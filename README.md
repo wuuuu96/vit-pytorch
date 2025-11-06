@@ -161,7 +161,21 @@ preds = v(img) # (1, 1000)
 
 <img src="./images/navit.png" width="450px"></img>
 
-<a href="https://arxiv.org/abs/2307.06304">This paper</a> proposes to leverage the flexibility of attention and masking for variable lengthed sequences to train images of multiple resolution, packed into a single batch. They demonstrate much faster training and improved accuracies, with the only cost being extra complexity in the architecture and dataloading. They use factorized 2d positional encodings, token dropping, as well as query-key normalization.
+<a href="https://arxiv.org/abs/2307.06304">This paper</a> 提出了一种方法，利用注意力机制（attention）和掩码机制（masking）在处理可变长度序列时的灵活性，
+从而实现在同一批次（batch）中训练多分辨率图像。
+
+这种方法在训练速度上显著提升，并且能够获得更高的精度，
+其代价只是在模型结构与数据加载（dataloader）上引入了一定的额外复杂性。
+
+论文中还采用了以下关键技术：
+
+分解式二维位置编码（factorized 2D positional encodings）；
+
+token dropping（令牌丢弃）；
+
+query-key 归一化（query-key normalization）。
+
+你可以按照下面的方式来使用该方法。
 
 You can use it as follows
 
