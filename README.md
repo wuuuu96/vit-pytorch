@@ -397,7 +397,10 @@ preds = v(img) # (1, 1000)
 
 <img src="./images/t2t.png" width="400px"></img>
 
-<a href="https://arxiv.org/abs/2101.11986">This paper</a> proposes that the first couple layers should downsample the image sequence by unfolding, leading to overlapping image data in each token as shown in the figure above. You can use this variant of the `ViT` as follows.
+这篇<a href="https://arxiv.org/abs/2101.11986">This paper</a> 提出， 在模型的前几层中可以通过 unfolding（展开） 操作对图像序列进行下采样，
+从而使得每个 token 中包含部分重叠的图像信息（如上图所示）。
+
+你可以按如下方式使用这种 `ViT` 的变体版本。
 
 ```python
 import torch
@@ -422,11 +425,12 @@ preds = v(img) # (1, 1000)
 
 <img src="https://raw.githubusercontent.com/SHI-Labs/Compact-Transformers/main/images/model_sym.png" width="400px"></img>
 
-<a href="https://arxiv.org/abs/2104.05704">CCT</a> proposes compact transformers
-by using convolutions instead of patching and performing sequence pooling. This
-allows for CCT to have high accuracy and a low number of parameters.
+<a href="https://arxiv.org/abs/2104.05704">CCT</a> 提出了一种紧凑型 Transformer，
+它通过卷积（convolution）替代传统的图像切块（patching）方式，并使用序列池化（sequence pooling）。
 
-You can use this with two methods
+这种设计使得 CCT 同时具备较高的准确率和较少的参数量。
+
+你可以通过以下两种方式来使用该模型。
 ```python
 import torch
 from vit_pytorch.cct import CCT
@@ -452,9 +456,16 @@ img = torch.randn(1, 3, 224, 448)
 pred = cct(img) # (1, 1000)
 ```
 
-Alternatively you can use one of several pre-defined models `[2,4,6,7,8,14,16]`
-which pre-define the number of layers, number of attention heads, the mlp ratio,
-and the embedding dimension.
+或者，你也可以直接使用几个预定义的模型`（[2, 4, 6, 7, 8, 14, 16]）`，
+这些模型已经预先设定了以下参数：
+
+层数（number of layers），
+
+注意力头数（number of attention heads），
+
+MLP 比例（mlp ratio），
+
+嵌入维度（embedding dimension）。
 
 ```python
 import torch
@@ -475,14 +486,17 @@ cct = cct_14(
 ```
 
 <a href="https://github.com/SHI-Labs/Compact-Transformers">Official
-Repository</a> includes links to pretrained model checkpoints.
+Repository官方仓库</a> 中提供了**预训练模型的权重（checkpoints）**下载链接。
 
 ## Cross ViT
 
 <img src="./images/cross_vit.png" width="400px"></img>
 
-<a href="https://arxiv.org/abs/2103.14899">This paper</a> proposes to have two vision transformers processing the image at different scales, cross attending to one every so often. They show improvements on top of the base vision transformer.
+<a href="https://arxiv.org/abs/2103.14899">This paper</a> 提出了一种结构，
+使用 两个视觉 Transformer 在**不同的图像尺度（scales）上并行处理图像，
+并且这两个 Transformer 会周期性地进行交叉注意（cross-attention）**以交换信息。
 
+实验结果表明，这种方法在基础版 Vision Transformer 的性能之上取得了进一步的提升。
 ```python
 import torch
 from vit_pytorch.cross_vit import CrossViT
@@ -516,7 +530,9 @@ pred = v(img) # (1, 1000)
 
 <img src="./images/pit.png" width="400px"></img>
 
-<a href="https://arxiv.org/abs/2103.16302">This paper</a> proposes to downsample the tokens through a pooling procedure using depth-wise convolutions.
+<a href="https://arxiv.org/abs/2103.16302">This paper</a> 提出了一种方法，
+通过使用**深度可分离卷积（depth-wise convolution）进行池化（pooling）**操作，
+以实现对 token 的下采样（downsampling）。
 
 ```python
 import torch
@@ -545,9 +561,19 @@ preds = v(img) # (1, 1000)
 
 <img src="./images/levit.png" width="300px"></img>
 
-<a href="https://arxiv.org/abs/2104.01136">This paper</a> proposes a number of changes, including (1) convolutional embedding instead of patch-wise projection (2) downsampling in stages (3) extra non-linearity in attention (4) 2d relative positional biases instead of initial absolute positional bias (5) batchnorm in place of layernorm.
+<a href="https://arxiv.org/abs/2104.01136">This paper</a> 提出了多项改进，包括：
 
-<a href="https://github.com/facebookresearch/LeViT">Official repository</a>
+1)使用卷积嵌入（convolutional embedding）替代原先的分块投影（patch-wise projection）；
+
+2)采用分阶段下采样（downsampling in stages）；
+
+3)在注意力机制中引入额外的非线性（extra non-linearity in attention）；
+
+4)使用二维相对位置偏置（2D relative positional biases），取代原始的绝对位置偏置（absolute positional bias）；
+
+5)用 BatchNorm 替代 LayerNorm。
+
+<a href="https://github.com/facebookresearch/LeViT">Official repository官方仓库</a>
 
 ```python
 import torch
@@ -573,7 +599,12 @@ levit(img) # (1, 1000)
 
 <img src="./images/cvt.png" width="400px"></img>
 
-<a href="https://arxiv.org/abs/2103.15808">This paper</a> proposes mixing convolutions and attention. Specifically, convolutions are used to embed and downsample the image / feature map in three stages. Depthwise-convoltion is also used to project the queries, keys, and values for attention.
+<a href="https://arxiv.org/abs/2103.15808">This paper</a> 提出了卷积与注意力机制相结合的方法。
+具体来说：
+
+使用卷积（convolutions）在三个阶段中对图像或特征图进行嵌入（embedding）和下采样（downsampling）；
+
+同时使用**深度可分离卷积（depthwise convolution）**来生成注意力机制中的 query、key 和 value 投影。
 
 ```python
 import torch
@@ -617,8 +648,8 @@ pred = v(img) # (1, 1000)
 
 <img src="./images/twins_svt.png" width="400px"></img>
 
-This <a href="https://arxiv.org/abs/2104.13840">paper</a> proposes mixing local and global attention, along with position encoding generator (proposed in <a href="https://arxiv.org/abs/2102.10882">CPVT</a>) and global average pooling, to achieve the same results as <a href="https://arxiv.org/abs/2103.14030">Swin</a>, without the extra complexity of shifted windows, CLS tokens, nor positional embeddings.
-
+This <a href="https://arxiv.org/abs/2104.13840">paper</a> 提出了将局部注意力（local attention）与全局注意力（global attention）相结合的方法，
+并引入了位置编码生成器（Position Encoding Generator, PEG） (最早由 <a href="https://arxiv.org/abs/2102.10882">CPVT提出</a>) 以及全局平均池化（Global Average Pooling）, 该方法在不使用 滑动窗口（shifted windows）、CLS token 或 位置嵌入（positional embeddings） 的情况下，达到了与 <a href="https://arxiv.org/abs/2103.14030">Swin</a>相当的效果，同时大大简化了模型结构。
 ```python
 import torch
 from vit_pytorch.twins_svt import TwinsSVT
@@ -660,9 +691,15 @@ pred = model(img) # (1, 1000)
 
 <img src="./images/regionvit2.png" width="400px"></img>
 
-<a href="https://arxiv.org/abs/2106.02689">This paper</a> proposes to divide up the feature map into local regions, whereby the local tokens attend to each other. Each local region has its own regional token which then attends to all its local tokens, as well as other regional tokens.
+<a href="https://arxiv.org/abs/2106.02689">This paper</a> 提出了将**特征图（feature map）划分为多个局部区域（local regions）**的方法，
+在每个局部区域内，局部 token 之间相互进行注意力计算（local tokens attend to each other）。
 
-You can use it as follows
+此外，每个局部区域还包含一个区域 token（regional token），
+它不仅与该区域内的所有局部 token 进行交互，还会与其他区域的区域 token进行注意力计算。
+
+这使得模型能够同时捕获局部细节信息与全局上下文关系。
+
+可以按下面方法运行
 
 ```python
 import torch
@@ -688,9 +725,14 @@ pred = model(img) # (1, 1000)
 
 <img src="./images/crossformer2.png" width="400px"></img>
 
-This <a href="https://arxiv.org/abs/2108.00154">paper</a> beats PVT and Swin using alternating local and global attention. The global attention is done across the windowing dimension for reduced complexity, much like the scheme used for axial attention.
+This <a href="https://arxiv.org/abs/2108.00154">paper</a> 通过交替使用局部注意力（local attention）和全局注意力（global attention），在性能上超越了 PVT 和 Swin Transformer。
 
-They also have cross-scale embedding layer, which they shown to be a generic layer that can improve all vision transformers. Dynamic relative positional bias was also formulated to allow the net to generalize to images of greater resolution.
+其中，全局注意力是在**窗口维度（windowing dimension）**上进行的，以此降低计算复杂度，这种机制与 轴向注意力（axial attention） 的设计思路类似。
+
+此外，论文还提出了一个跨尺度嵌入层（cross-scale embedding layer），作者证明该层是一种通用模块，可用于提升各种视觉 Transformer 的性能。
+
+同时，研究者还引入了动态相对位置偏置（dynamic relative positional bias），
+使得模型能够泛化到更高分辨率的图像，进一步增强了模型的适应性与可扩展性。
 
 ```python
 import torch
@@ -715,11 +757,17 @@ pred = model(img) # (1, 1000)
 
 <img src="./images/scalable-vit-2.png" width="400px"></img>
 
-This Bytedance AI <a href="https://arxiv.org/abs/2203.10790">paper</a> proposes the Scalable Self Attention (SSA) and the Interactive Windowed Self Attention (IWSA) modules. The SSA alleviates the computation needed at earlier stages by reducing the key / value feature map by some factor (`reduction_factor`), while modulating the dimension of the queries and keys (`ssa_dim_key`). The IWSA performs self attention within local windows, similar to other vision transformer papers. However, they add a residual of the values, passed through a convolution of kernel size 3, which they named Local Interactive Module (LIM).
+这篇由 字节跳动 AI 团队发表的 <a href="https://arxiv.org/abs/2203.10790">paper</a> 提出了两个新模块：
+可扩展自注意力（Scalable Self Attention, SSA） 和 交互式窗口自注意力（Interactive Windowed Self Attention, IWSA）。
 
-They make the claim in this paper that this scheme outperforms Swin Transformer, and also demonstrate competitive performance against Crossformer.
+SSA 模块：通过将 Key / Value 特征图 按一定比例（reduction_factor）下采样来降低早期阶段的计算量，同时调整 Query 和 Key 的维度大小（ssa_dim_key），从而在保持性能的前提下减少计算开销。
 
-You can use it as follows (ex. ScalableViT-S)
+IWSA 模块：在局部窗口中执行自注意力（类似于其他视觉 Transformer 方法），但额外加入了一个 局部交互模块（Local Interactive Module, LIM）。
+LIM 将 Value 向量通过一个卷积核大小为 3 的卷积层后再以残差形式加入，从而增强局部特征的建模能力。
+
+论文中声称这种架构的性能超过了 Swin Transformer，并在实验中展示了对 Crossformer 的竞争性结果。
+
+例如，下面展示了如何使用 ScalableViT-S（小型可扩展视觉 Transformer）模型的示例用法。
 
 ```python
 import torch
@@ -745,11 +793,16 @@ preds = model(img) # (1, 1000)
 
 <img src="./images/sep-vit.png" width="400px"></img>
 
-Another <a href="https://arxiv.org/abs/2203.15380">Bytedance AI paper</a>, it proposes a depthwise-pointwise self-attention layer that seems largely inspired by mobilenet's depthwise-separable convolution. The most interesting aspect is the reuse of the feature map from the depthwise self-attention stage as the values for the pointwise self-attention, as shown in the diagram above.
+另一篇由 字节跳动 AI 团队发表的 <a href="https://arxiv.org/abs/2203.15380">Bytedance AI paper</a>, 提出了一个 深度可分离-逐点自注意力层（Depthwise-Pointwise Self-Attention Layer），其设计灵感主要来源于 MobileNet 的深度可分离卷积结构。
 
-I have decided to include only the version of `SepViT` with this specific self-attention layer, as the grouped attention layers are not remarkable nor novel, and the authors were not clear on how they treated the window tokens for the group self-attention layer. Besides, it seems like with `DSSA` layer alone, they were able to beat Swin.
+其中最有趣的创新在于：将深度自注意力阶段产生的特征图（feature map）直接复用为逐点自注意力（pointwise self-attention）阶段的 Value 输入，如上图所示。这种跨阶段信息复用大大提升了特征利用率与效率。
 
-ex. SepViT-Lite
+我只在实现中保留了带有这种特定自注意力层的版本（称为 SepViT），
+因为论文中提到的分组注意力（grouped attention）部分既不新颖，也未清楚说明其对窗口内 token 的处理方式。
+此外，作者的实验表明，仅使用这个 DSSA 层（Depthwise Separable Self-Attention），
+就已经能在性能上超越 Swin Transformer。
+
+例如，可以使用轻量化版本 SepViT-Lite 来实现该结构。
 
 ```python
 import torch
@@ -774,12 +827,14 @@ preds = v(img) # (1, 1000)
 
 <img src="./images/max-vit.png" width="400px"></img>
 
-<a href="https://arxiv.org/abs/2204.01697">This paper</a> proposes a hybrid convolutional / attention network, using MBConv from the convolution side, and then block / grid axial sparse attention.
+<a href="https://arxiv.org/abs/2204.01697">This paper</a> 提出了一个卷积与注意力结合的混合网络结构，
+在卷积部分使用了 MBConv 模块（来自 MobileNetV2 的高效卷积单元），
+而在注意力部分采用了 块状（block）/ 网格（grid）轴向稀疏注意力机制（axial sparse attention）。
 
-They also claim this specific vision transformer is good for generative models (GANs).
+研究者还指出，这种特定结构的视觉 Transformer 在生成模型（例如 GAN）任务中表现良好，
+能够兼顾特征提取能力与生成效果。
 
-ex. MaxViT-S
-
+例如，可以使用轻量化版本 MaxViT-S 来实现该模型。
 ```python
 import torch
 from vit_pytorch.max_vit import MaxViT
@@ -805,9 +860,17 @@ preds = v(img) # (2, 1000)
 
 <img src="./images/nest.png" width="400px"></img>
 
-This <a href="https://arxiv.org/abs/2105.12723">paper</a> decided to process the image in hierarchical stages, with attention only within tokens of local blocks, which aggregate as it moves up the hierarchy. The aggregation is done in the image plane, and contains a convolution and subsequent maxpool to allow it to pass information across the boundary.
+ <a href="https://arxiv.org/abs/2105.12723">paper</a> 提出了一种分层（hierarchical）视觉 Transformer 架构，
+在不同的层次阶段对图像进行处理。
 
-You can use it with the following code (ex. NesT-T)
+在每个阶段中，注意力（attention）仅在局部块（local block）内的 token 之间计算，
+并且随着层级上升，这些局部块会逐步聚合（aggregation）成更高层次的表示。
+
+这种聚合操作在**图像平面（image plane）上完成，
+并且通过卷积（convolution）与后续的最大池化（maxpool）**来实现跨块（block boundary）的信息传递，
+从而让模型既保留局部特征，又能整合全局上下文信息。
+
+下面是使用该结构的示例代码，例如轻量化版本 NesT-T。
 
 ```python
 import torch
@@ -832,10 +895,14 @@ pred = nest(img) # (1, 1000)
 
 <img src="./images/mbvit.png" width="400px"></img>
 
-This <a href="https://arxiv.org/abs/2110.02178">paper</a> introduce MobileViT, a light-weight and general purpose vision transformer for mobile devices. MobileViT presents a different
-perspective for the global processing of information with transformers.
+ <a href="https://arxiv.org/abs/2110.02178">paper</a>介绍了 MobileViT，
+一种为移动设备设计的轻量级通用视觉 Transformer。
 
-You can use it with the following code (ex. mobilevit_xs)
+MobileViT 提供了一种全新的思路，
+它通过 Transformer 的全局信息处理能力，
+在保持轻量化结构的同时，实现了对图像全局特征的有效建模。
+
+你可以使用如下代码（例如 mobilevit_xs 版本）来调用该模型。
 
 ```python
 import torch
@@ -857,9 +924,20 @@ pred = mbvit_xs(img) # (1, 1000)
 
 <img src="./images/xcit.png" width="400px"></img>
 
-This <a href="https://arxiv.org/abs/2106.09681">paper</a> introduces the cross covariance attention (abbreviated XCA). One can think of it as doing attention across the features dimension rather than the spatial one (another perspective would be a dynamic 1x1 convolution, the kernel being attention map defined by spatial correlations).
+ <a href="https://arxiv.org/abs/2106.09681">paper</a> 提出了交叉协方差注意力机制（Cross Covariance Attention, XCA）。
 
-Technically, this amounts to simply transposing the query, key, values before executing cosine similarity attention with learned temperature.
+可以将它理解为：
+与传统的注意力机制在**空间维度（spatial dimension）上计算注意力不同，
+XCA 在特征维度（feature dimension）**上执行注意力计算。
+
+换一种角度理解，
+它相当于一种动态的 1×1 卷积（dynamic 1x1 convolution），
+其中卷积核由**空间相关性（spatial correlations）**定义的注意力图（attention map）动态生成。
+
+从技术上讲，
+XCA 仅仅是在执行余弦相似度注意力（cosine similarity attention）之前，
+对查询（query）、键（key）、值（value）进行转置（transpose），
+并使用一个**可学习的温度参数（learned temperature）**来调节注意力分布。
 
 ```python
 import torch
@@ -889,9 +967,15 @@ preds = v(img) # (1, 1000)
 
 <img src="./images/simmim.png" width="400px"/>
 
-This <a href="https://arxiv.org/abs/2111.09886">paper</a> proposes a simple masked image modeling (SimMIM) scheme, using only a linear projection off the masked tokens into pixel space followed by an L1 loss with the pixel values of the masked patches. Results are competitive with other more complicated approaches.
+<a href="https://arxiv.org/abs/2111.09886">paper</a> 提出了一种**简单的掩码图像建模（SimMIM, Simple Masked Image Modeling）**方法。
 
-You can use this as follows
+在这种方法中，模型仅使用一个线性投影层（linear projection），
+将被掩盖的图像 token 映射回像素空间，
+然后与原始图像中被掩盖区域的像素值计算 L1 损失（L1 loss）。
+
+尽管方法非常简单，但其实验结果与许多更复杂的掩码建模方法相比依然具有竞争力（competitive performance）。
+
+你可以如下方式使用该方法。
 
 ```python
 import torch
@@ -929,13 +1013,18 @@ torch.save(v.state_dict(), './trained-vit.pt')
 
 <img src="./images/mae.png" width="400px"/>
 
-A new <a href="https://arxiv.org/abs/2111.06377">Kaiming He paper</a> proposes a simple autoencoder scheme where the vision transformer attends to a set of unmasked patches, and a smaller decoder tries to reconstruct the masked pixel values.
+这篇由 何恺明（Kaiming He） 等人发表的 <a href="https://arxiv.org/abs/2111.06377">Kaiming He paper</a> 提出了一种简单的自编码器（autoencoder）结构。
 
+在这种方法中，
+视觉 Transformer（ViT）只对未被掩盖的图像块（unmasked patches）进行注意力计算，
+而一个更小的解码器（decoder）负责重建被掩盖的像素值（masked pixel values）。
+
+相关讲解视频：
 <a href="https://www.youtube.com/watch?v=LKixq2S2Pz8">DeepReader quick paper review</a>
 
 <a href="https://www.youtube.com/watch?v=Dp6iICL2dVI">AI Coffeebreak with Letitia</a>
 
-You can use it with the following code
+你可以使用以下代码来实现该模型。
 
 ```python
 import torch
@@ -972,7 +1061,7 @@ torch.save(v.state_dict(), './trained-vit.pt')
 
 ## Masked Patch Prediction
 
-Thanks to <a href="https://github.com/zankner">Zach</a>, you can train using the original masked patch prediction task presented in the paper, with the following code.
+ <a href="https://github.com/zankner">Zach</a>提出的**原始掩码图像块预测任务（masked patch prediction task）**
 
 ```python
 import torch
@@ -1020,7 +1109,9 @@ torch.save(model.state_dict(), './pretrained-net.pt')
 
 <img src="./images/mp3.png" width="400px"></img>
 
-New <a href="https://arxiv.org/abs/2207.07611">paper</a> that introduces masked position prediction pre-training criteria. This strategy is more efficient than the Masked Autoencoder strategy and has comparable performance.  
+New <a href="https://arxiv.org/abs/2207.07611">paper</a> 提出了掩码位置预测（masked position prediction）的预训练策略。
+这种方法相比于传统的掩码自编码器（Masked Autoencoder, MAE）策略具有更高的效率，
+同时在性能上也能达到相当的水平（comparable performance）。
 
 ```python
 import torch
@@ -1058,8 +1149,11 @@ torch.save(v.state_dict(), './trained-vit.pt')
 
 <img src="./images/ats.png" width="400px"></img>
 
-This <a href="https://arxiv.org/abs/2111.15667">paper</a> proposes to use the CLS attention scores, re-weighed by the norms of the value heads, as means to discard unimportant tokens at different layers.
-
+<a href="https://arxiv.org/abs/2111.15667">paper</a> 提出了一种方法：
+利用 CLS（分类）token 的注意力分数（attention scores），
+并根据 value head 的范数（norms） 对这些分数进行重新加权，
+从而在不同层中筛除（丢弃）不重要的 token，
+以减少计算量并提升模型效率。
 ```python
 import torch
 from vit_pytorch.ats_vit import ViT
@@ -1092,7 +1186,9 @@ preds, token_ids = v(img, return_sampled_token_ids = True) # (4, 1000), (4, <=8)
 
 <img src="./images/patch_merger.png" width="400px"></img>
 
-This <a href="https://arxiv.org/abs/2202.12015">paper</a> proposes a simple module (Patch Merger) for reducing the number of tokens at any layer of a vision transformer without sacrificing performance.
+<a href="https://arxiv.org/abs/2202.12015">paper</a> 提出了一个简单的模块——Patch Merger（块合并器），
+它可以在视觉 Transformer 的任意层中减少 token（图像块表示）的数量，
+而不会损失模型性能。
 
 ```python
 import torch
@@ -1137,9 +1233,18 @@ out = merger(features) # (4, 8, 1024)
 
 <img src="./images/vit_for_small_datasets.png" width="400px"></img>
 
-This <a href="https://arxiv.org/abs/2112.13492">paper</a> proposes a new image to patch function that incorporates shifts of the image, before normalizing and dividing the image into patches. I have found shifting to be extremely helpful in some other transformers work, so decided to include this for further explorations. It also includes the `LSA` with the learned temperature and masking out of a token's attention to itself.
+This <a href="https://arxiv.org/abs/2112.13492">paper</a>提出了一个新的 图像到块（image-to-patch） 函数，
+在对图像进行标准化和划分为 patch（块）之前，
+会先对图像进行平移（shift）操作。
 
-You can use as follows:
+作者指出，这种平移操作在其他 Transformer 相关研究中非常有帮助，
+因此决定将其纳入以便进一步探索。
+
+此外，该方法还包含了 LSA（局部自注意力，Local Self-Attention） 模块，
+其中引入了可学习的温度参数（learned temperature），
+并在注意力计算中屏蔽掉 token 对自身的注意（self-attention masking）。
+
+
 
 ```python
 import torch
@@ -1162,7 +1267,7 @@ img = torch.randn(4, 3, 256, 256)
 preds = v(img) # (1, 1000)
 ```
 
-You can also use the `SPT` from this paper as a standalone module
+你也可以将这篇论文中的 SPT（Shifted Patch Tokenization，平移块标记化） 作为一个独立模块来使用。
 
 ```python
 import torch
@@ -1181,11 +1286,16 @@ tokens = spt(img) # (4, 256, 1024)
 
 ## 3D ViT
 
-By popular request, I will start extending a few of the architectures in this repository to 3D ViTs, for use with video, medical imaging, etc.
+根据大家的广泛要求，我将开始把本仓库中的部分模型架构扩展为 3D ViT（3D 视觉 Transformer），
+以便用于视频、医学影像等三维数据场景。
 
-You will need to pass in two additional hyperparameters: (1) the number of frames `frames` and (2) patch size along the frame dimension `frame_patch_size`
+在使用时，你需要额外传入两个超参数：
 
-For starters, 3D ViT
+frames —— 视频帧的数量；
+
+frame_patch_size —— 在时间维度上（帧方向）的 patch 大小。
+
+以下是一个 3D ViT 的示例起点。
 
 ```python
 import torch
@@ -1266,8 +1376,15 @@ pred = cct(video)
 
 <img src="./images/vivit.png" width="350px"></img>
 
-This <a href="https://arxiv.org/abs/2103.15691">paper</a> offers 3 different types of architectures for efficient attention of videos, with the main theme being factorizing the attention across space and time. This repository includes the factorized encoder and the factorized self-attention variant.
-The factorized encoder variant is a spatial transformer followed by a temporal one. The factorized self-attention variant is a spatio-temporal transformer with alternating spatial and temporal self-attention layers.
+ <a href="https://arxiv.org/abs/2103.15691">paper</a> 提出了三种不同类型的高效视频注意力结构，
+其核心思想是将注意力机制在空间（space）和时间（time）维度上进行因式分解（factorization）。
+
+本仓库实现了其中两种变体：
+
+Factorized Encoder（分解式编码器）：先进行空间 Transformer，再进行时间 Transformer；
+
+Factorized Self-Attention（分解式自注意力）：是一个时空 Transformer（spatio-temporal transformer），
+其中空间注意力层与时间注意力层交替堆叠。
 
 ```python
 import torch
@@ -1296,9 +1413,10 @@ preds = v(video) # (4, 1000)
 
 <img src="./images/parallel-vit.png" width="350px"></img>
 
-This <a href="https://arxiv.org/abs/2203.09795">paper</a> propose parallelizing multiple attention and feedforward blocks per layer (2 blocks), claiming that it is easier to train without loss of performance.
+ <a href="https://arxiv.org/abs/2203.09795">paper</a> 提出在每一层中并行化多个注意力（attention）和前馈网络（feedforward）模块（例如 2 个并行块），
+作者声称这种结构在不降低性能的前提下，可以让模型训练得更容易、更稳定。
 
-You can try this variant as follows
+你可以按照下面的方式尝试这种变体。
 
 ```python
 import torch
@@ -1326,9 +1444,12 @@ preds = v(img) # (4, 1000)
 
 <img src="./images/learnable-memory-vit.png" width="350px"></img>
 
-This <a href="https://arxiv.org/abs/2203.15243">paper</a> shows that adding learnable memory tokens at each layer of a vision transformer can greatly enhance fine-tuning results (in addition to learnable task specific CLS token and adapter head).
+<a href="https://arxiv.org/abs/2203.15243">paper</a> 表明，在视觉 Transformer（ViT）的每一层中加入可学习的记忆 token（learnable memory tokens），
+可以显著提升模型在微调（fine-tuning）阶段的效果。
 
-You can use this with a specially modified `ViT` as follows
+此外，作者还结合了可学习的任务特定 CLS token 和 适配器头（adapter head），进一步增强了模型性能。
+
+你可以使用下面特别修改过的 ViT 来实现这一机制。
 
 ```python
 import torch
@@ -1382,7 +1503,7 @@ logits2 = adapter2(img) # (4, 4) - predict 4 classes off frozen ViT backbone wit
 
 <img src="./images/dino.png" width="350px"></img>
 
-You can train `ViT` with the recent SOTA self-supervised learning technique, <a href="https://arxiv.org/abs/2104.14294">Dino</a>, with the following code.
+你可以使用最近的自监督学习领域的最新 SOTA 技术——DINO, <a href="https://arxiv.org/abs/2104.14294">Dino</a>, 来训练 ViT 模型，方法如下所示。
 
 <a href="https://www.youtube.com/watch?v=h3ij3F3cPIk">Yannic Kilcher</a> video
 
@@ -1436,9 +1557,20 @@ torch.save(model.state_dict(), './pretrained-net.pt')
 
 <img src="./images/esvit.png" width="350px"></img>
 
-<a href="https://arxiv.org/abs/2106.09785">`EsViT`</a> is a variant of Dino (from above) re-engineered to support efficient `ViT`s with patch merging / downsampling by taking into an account an extra regional loss between the augmented views. To quote the abstract, it `outperforms its supervised counterpart on 17 out of 18 datasets` at 3 times higher throughput.
+<a href="https://arxiv.org/abs/2106.09785">`EsViT`</a> 是一种基于上文提到的 DINO 改进而来的自监督学习方法。
+它针对带有 patch 合并 / 下采样机制的高效 Vision Transformer（ViT） 进行了重新设计，
+在训练时额外引入了一个 区域级损失（regional loss），用于对齐不同增强视图（augmented views）之间的特征。
 
-Even though it is named as though it were a new `ViT` variant, it actually is just a strategy for training any multistage `ViT` (in the paper, they focused on Swin). The example below will show how to use it with `CvT`. You'll need to set the `hidden_layer` to the name of the layer within your efficient ViT that outputs the non-average pooled visual representations, just before the global pooling and projection to logits.
+引用论文摘要中的原话，它在 18 个数据集中的 17 个上都超越了有监督模型的表现，
+而且训练吞吐量提升了 3 倍。
+
+尽管名字中包含 “ViT”，但它实际上并不是一种新的 ViT 结构，
+而是一种适用于多阶段（multi-stage）ViT 的训练策略。
+论文中主要针对 Swin Transformer 进行了研究。
+
+下面的示例展示了如何将 EsViT 应用于 CvT 模型。
+你需要将参数 hidden_layer 设置为模型中输出未经过全局池化（global pooling）和投影（projection to logits）前的
+那一层的名称，以便获取非平均池化的视觉特征表示。
 
 ```python
 import torch
@@ -1508,7 +1640,7 @@ torch.save(cvt.state_dict(), './pretrained-net.pt')
 
 ## Accessing Attention
 
-If you would like to visualize the attention weights (post-softmax) for your research, just follow the procedure below
+如果你想在研究中可视化注意力权重（softmax 之后的结果），只需按照下面的步骤进行即可。
 
 ```python
 import torch
@@ -1549,7 +1681,7 @@ v = v.eject()  # wrapper is discarded and original ViT instance is returned
 
 ## Accessing Embeddings
 
-You can similarly access the embeddings with the `Extractor` wrapper
+你也可以使用 `Extractor` 封装器（wrapper）以类似的方式获取模型的特征嵌入（embeddings）。
 
 ```python
 import torch
@@ -1627,9 +1759,11 @@ embeddings # ((1, 257, 192), (1, 17, 384)) - (batch x patches x dimension) <- la
 
 ### Efficient Attention
 
-There may be some coming from computer vision who think attention still suffers from quadratic costs. Fortunately, we have a lot of new techniques that may help. This repository offers a way for you to plugin your own sparse attention transformer.
+可能有一些来自计算机视觉领域的研究者仍然认为注意力机制的计算代价是二次复杂度（quadratic cost）。
+幸运的是，现在已经有许多新的技术可以缓解这一问题。
+本仓库提供了一种方式，让你可以插入（plugin）自己实现的稀疏注意力 Transformer。
 
-An example with <a href="https://arxiv.org/abs/2102.03902">Nystromformer</a>
+以下是一个使用 <a href="https://arxiv.org/abs/2102.03902">Nystromformer</a>的示例。
 
 ```bash
 $ pip install nystrom-attention
@@ -1659,13 +1793,14 @@ img = torch.randn(1, 3, 2048, 2048) # your high resolution picture
 v(img) # (1, 1000)
 ```
 
-Other sparse attention frameworks I would highly recommend is <a href="https://github.com/lucidrains/routing-transformer">Routing Transformer</a> or <a href="https://github.com/lucidrains/sinkhorn-transformer">Sinkhorn Transformer</a>
+我强烈推荐的其他稀疏注意力框架包括： <a href="https://github.com/lucidrains/routing-transformer">Routing Transformer</a> 和 <a href="https://github.com/lucidrains/sinkhorn-transformer">Sinkhorn Transformer</a>，它们都是非常优秀的稀疏注意力（Sparse Attention）实现，可用于在保持性能的同时显著降低计算复杂度。
 
 ### Combining with other Transformer improvements
 
-This paper purposely used the most vanilla of attention networks to make a statement. If you would like to use some of the latest improvements for attention nets, please use the `Encoder` from <a href="https://github.com/lucidrains/x-transformers">this repository</a>.
+这篇论文特意使用了最基础版本（最原始、未经改进）的注意力网络，以此来表达其核心观点。
+如果你希望使用更先进的注意力网络改进版本，请使用来自这个 <a href="https://github.com/lucidrains/x-transformers">this repository</a>的`Encoder`模块。
 
-ex.
+例如：
 
 ```bash
 $ pip install x-transformers
@@ -1696,11 +1831,16 @@ v(img) # (1, 1000)
 
 ## FAQ
 
-- How do I pass in non-square images?
+- 如何输入非正方形图像？
 
-You can already pass in non-square images - you just have to make sure your height and width is less than or equal to the `image_size`, and both divisible by the `patch_size`
+你其实已经可以直接输入非正方形图像了——
+只需要确保：
 
-ex.
+图像的高度（height）和宽度（width）都 小于或等于 image_size；
+
+并且 高度和宽度都能被 patch_size 整除。
+
+例如：
 
 ```python
 import torch
@@ -1746,15 +1886,21 @@ img = torch.randn(1, 3, 256, 128)
 preds = v(img)
 ```
 
-## Resources
+## 资源
 
-Coming from computer vision and new to transformers? Here are some resources that greatly accelerated my learning.
+如果你来自计算机视觉领域，并且是第一次接触 Transformer，下面这些资源能极大地帮助你快速入门：
 
 1. <a href="http://jalammar.github.io/illustrated-transformer/">Illustrated Transformer</a> - Jay Alammar
 
+1. 直观生动地讲解了 Transformer 的结构和工作原理，非常适合初学者。
+
 2. <a href="http://peterbloem.nl/blog/transformers">Transformers from Scratch</a>  - Peter Bloem
 
+2. 从零开始一步步推导 Transformer 的数学原理与实现细节。
+
 3. <a href="https://nlp.seas.harvard.edu/2018/04/03/attention.html">The Annotated Transformer</a> - Harvard NLP
+
+3.基于 PyTorch 的可执行讲解版 Transformer，实现、注释和理论结合，非常系统。
 
 
 ## Citations
