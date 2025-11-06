@@ -177,8 +177,6 @@ query-key 归一化（query-key normalization）。
 
 你可以按照下面的方式来使用该方法。
 
-You can use it as follows
-
 ```python
 import torch
 from vit_pytorch.na_vit import NaViT
@@ -210,7 +208,9 @@ preds = v(images) # (5, 1000) - 5, because 5 images of different resolution abov
 
 ```
 
-Or if you would rather that the framework auto group the images into variable lengthed sequences that do not exceed a certain max length
+或者，如果你希望框架自动将图像分组成可变长度的序列，
+并确保这些序列的总长度不超过设定的最大长度（max length），
+也可以使用这种方式。
 
 ```python
 images = [
@@ -228,7 +228,10 @@ preds = v(
 ) # (5, 1000)
 ```
 
-Finally, if you would like to make use of a flavor of NaViT using <a href="https://pytorch.org/tutorials/prototype/nestedtensor.html">nested tensors</a> (which will omit a lot of the masking and padding altogether), make sure you are on version `2.5` and import as follows
+最后，如果你想使用一种基于 <a href="https://pytorch.org/tutorials/prototype/nestedtensor.html">nested tensors（嵌套张量）</a> 的 NaViT 变体，
+这种方式可以省去大量的掩码（masking）和填充（padding）操作，
+请确保你的 PyTorch 版本为 2.5 或更高，
+并按照以下方式导入使用。
 
 ```python
 import torch
@@ -264,9 +267,15 @@ assert preds.shape == (5, 1000)
 
 <img src="./images/distill.png" width="300px"></img>
 
-A recent <a href="https://arxiv.org/abs/2012.12877">paper</a> has shown that use of a distillation token for distilling knowledge from convolutional nets to vision transformer can yield small and efficient vision transformers. This repository offers the means to do distillation easily.
+一篇最新的 <a href="https://arxiv.org/abs/2012.12877">paper</a> 表明，
+在视觉 Transformer 中引入一种 “蒸馏标记（distillation token）”，
+可以将卷积神经网络（CNN）中的知识**蒸馏（distill）**到 Transformer 中，
+从而获得更小、更高效的视觉 Transformer 模型。
 
-ex. distilling from Resnet50 (or any teacher) to a vision transformer
+本仓库提供了便捷的方法，帮助你轻松实现这种蒸馏过程。
+
+例如：
+可以将 ResNet50（或其他教师模型） 的知识蒸馏到一个 Vision Transformer 中。
 
 ```python
 import torch
@@ -307,9 +316,12 @@ loss.backward()
 pred = v(img) # (2, 1000)
 ```
 
-The `DistillableViT` class is identical to `ViT` except for how the forward pass is handled, so you should be able to load the parameters back to `ViT` after you have completed distillation training.
+DistillableViT 类与 ViT 几乎完全相同，
+唯一的区别在于 前向传播（forward pass） 的处理方式。
+因此，在完成蒸馏训练后，你可以将参数重新加载回普通的 ViT 模型中使用。
 
-You can also use the handy `.to_vit` method on the `DistillableViT` instance to get back a `ViT` instance.
+此外，你还可以直接调用 DistillableViT 实例自带的 .to_vit 方法，
+快速将其转换回标准的 ViT 实例。
 
 ```python
 v = v.to_vit()
@@ -319,9 +331,15 @@ type(v) # <class 'vit_pytorch.vit_pytorch.ViT'>
 
 ## Deep ViT
 
-This <a href="https://arxiv.org/abs/2103.11886">paper</a> notes that ViT struggles to attend at greater depths (past 12 layers), and suggests mixing the attention of each head post-softmax as a solution, dubbed Re-attention. The results line up with the <a href="https://github.com/lucidrains/x-transformers#talking-heads-attention">Talking Heads</a> paper from NLP.
+这篇 <a href="https://arxiv.org/abs/2103.11886">paper</a> 指出，
+ViT 在较深层（超过 12 层）时难以有效捕捉注意力信息，
+为此作者提出了一种解决方案 ——
+在 softmax 之后对各个注意力头（attention head）的输出进行混合，
+这种方法被称为 “再注意力（Re-attention）”。 
 
-You can use it as follows
+其实这一结果与自然语言处理领域中的 <a href="https://github.com/lucidrains/x-transformers#talking-heads-attention">Talking Heads注意力机制</a> 的研究结论非常一致。
+
+你可以按照以下方式来使用该方法。
 
 ```python
 import torch
