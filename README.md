@@ -117,7 +117,7 @@ Embedding 层的 Dropout 比例。
 - `pool`: 表示池化方式，可以是`cls`表示使用分类 token（class token）进行池化；也可以是`mean`表示使用平均池化（mean pooling）。
 
 
-## Simple ViT(简化版 ViT)
+## Simple ViT
 
 由原论文部分作者发布的<a href="https://arxiv.org/abs/2205.01580">An update</a> 提出了对 `ViT` 的多项简化改进，
 这些改进使模型能够训练得更快、效果更好。
