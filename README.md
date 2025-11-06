@@ -52,23 +52,23 @@
 
 ## Vision Transformer - Pytorch
 
-这是一个在 PyTorch环境中实现的 <a href="https://openreview.net/pdf?id=YicbFdNTTy">ViT</a>,它只使用单个 Transformer 编码器，就能在视觉分类任务中达到最先进（SOTA）的效果。 Significance is further explained in <a href="https://www.youtube.com/watch?v=TrdevFK_am4">Yannic Kilcher's</a> video. There's really not much to code here, but may as well lay it out for everyone so we expedite the attention revolution.
+这是一个在 PyTorch环境中实现的 <a href="https://openreview.net/pdf?id=YicbFdNTTy">ViT模型</a>的库,其中ViT模型只使用单个 Transformer 编码器，就能在视觉分类任务中达到最先进（SOTA）的效果。 关于其重要性的进一步讲解，可以参考 <a href="https://www.youtube.com/watch?v=TrdevFK_am4">Yannic Kilcher's</a> 视频.其实代码量并不多，但我们把它整理出来，
+是为了让更多人能够快速上手并加速这场“注意力机制革命”。
+如果你想要使用的是**带预训练模型的 PyTorch 实现**，请参考 Ross Wightman 的仓库： <a href="https://github.com/rwightman/pytorch-image-models">here</a>.
 
-For a Pytorch implementation with pretrained models, please see Ross Wightman's repository <a href="https://github.com/rwightman/pytorch-image-models">here</a>.
+Vision Transformer 的 **官方 JAX 实现** 在这里： <a href="https://github.com/google-research/vision_transformer">here</a>.
 
-The official Jax repository is <a href="https://github.com/google-research/vision_transformer">here</a>.
+还有一个由研究科学家 Junho Kim 编写的 **TensorFlow 2** 版本：<a href="https://github.com/taki0112/vit-tensorflow">here</a>
 
-A tensorflow2 translation also exists <a href="https://github.com/taki0112/vit-tensorflow">here</a>, created by research scientist <a href="https://github.com/taki0112">Junho Kim</a>! 🙏
+此外，还有一个由 Enrico Shippole创建的 **Flax 实现版本**：<a href="https://github.com/conceptofmind/vit-flax">Flax translation</a> 
 
-<a href="https://github.com/conceptofmind/vit-flax">Flax translation</a> by <a href="https://github.com/conceptofmind">Enrico Shippole</a>!
-
-## Install
+## Install(安装)
 
 ```bash
 $ pip install vit-pytorch
 ```
 
-## Usage
+## Usage(用法)
 
 ```python
 import torch
@@ -91,39 +91,52 @@ img = torch.randn(1, 3, 256, 256)
 preds = v(img) # (1, 1000)
 ```
 
-## Parameters
+## Parameters(参数)
 
-- `image_size`: int.  
-Image size. If you have rectangular images, make sure your image size is the maximum of the width and height
+- `image_size`: 整型.  
+图像尺寸。如果你的图像是矩形的，请确保该值为图像宽度和高度中的最大值。
 - `patch_size`: int.  
-Size of patches. `image_size` must be divisible by `patch_size`.  
-The number of patches is: ` n = (image_size // patch_size) ** 2` and `n` **must be greater than 16**.
+patches尺寸。 `image_size` 必须能被 `patch_size`整除.  
+Patch 的总数量为: ` n = (image_size // patch_size) ** 2` 并且 `n` 必须大于 16.
 - `num_classes`: int.  
-Number of classes to classify.
+分类任务中的类别数量。
 - `dim`: int.  
-Last dimension of output tensor after linear transformation `nn.Linear(..., dim)`.
+经过线性变换 `nn.Linear(..., dim)` 后输出张量的最后一个维度大小。
 - `depth`: int.  
-Number of Transformer blocks.
+Transformer 模块（Block）的层数。
 - `heads`: int.  
-Number of heads in Multi-head Attention layer. 
+多头注意力层（Multi-head Attention）中的注意力头数。
 - `mlp_dim`: int.  
-Dimension of the MLP (FeedForward) layer. 
+MLP（前馈网络，FeedForward）层的维度大小。
 - `channels`: int, default `3`.  
-Number of image's channels. 
+输入图像的通道数（例如 RGB 图像为 3 通道）。
 - `dropout`: float between `[0, 1]`, default `0.`.  
-Dropout rate. 
+Dropout 随机失活的比例。
 - `emb_dropout`: float between `[0, 1]`, default `0`.  
-Embedding dropout rate.
-- `pool`: string, either `cls` token pooling or `mean` pooling
+Embedding 层的 Dropout 比例。
+- `pool`: 表示池化方式，可以是`cls`表示使用分类 token（class token）进行池化；也可以是`mean`表示使用平均池化（mean pooling）。
 
 
-## Simple ViT
+## Simple ViT(简化版 ViT)
 
-<a href="https://arxiv.org/abs/2205.01580">An update</a> from some of the same authors of the original paper proposes simplifications to `ViT` that allows it to train faster and better.
+由原论文部分作者发布的<a href="https://arxiv.org/abs/2205.01580">An update</a> 提出了对 `ViT` 的多项简化改进，
+这些改进使模型能够训练得更快、效果更好。
 
-Among these simplifications include 2d sinusoidal positional embedding, global average pooling (no CLS token), no dropout, batch sizes of 1024 rather than 4096, and use of RandAugment and MixUp augmentations. They also show that a simple linear at the end is not significantly worse than the original MLP head
+主要改进包括：
 
-You can use it by importing the `SimpleViT` as shown below
+使用 二维正弦位置嵌入（2D sinusoidal positional embedding）；
+
+使用 全局平均池化（Global Average Pooling），取消了原始的 CLS token；
+
+去除 Dropout；
+
+将批量大小从 4096 降至 1024；
+
+采用 RandAugment 与 MixUp 数据增强方法；
+
+研究发现，使用一个简单的线性层（Linear Head） 代替原始的 MLP 头部，性能并不会显著下降。
+
+你可以按照下面的示例代码来导入并使用 SimpleViT：
 
 ```python
 import torch
